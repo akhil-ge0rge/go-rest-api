@@ -14,6 +14,13 @@ type Event struct {
 	UserID      int
 }
 
+type UpdateEventInput struct {
+	Name        *string    `json:"name"`
+	Description *string    `json:"description"`
+	Location    *string    `json:"location"`
+	DateTime    *time.Time `json:"dateTime"`
+}
+
 var events = []Event{}
 
 func (e Event) Save() error {
@@ -87,6 +94,31 @@ func (event Event) Update() error {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(event.Name, event.Description, event.Location, event.DateTime, event.ID)
+
+	return err
+}
+
+func (event Event) Patch() error {
+	query := `
+	UPDATE events 
+	SET name = ?,
+	description = ?,
+	location = ?,
+	dateTime = ?
+	WHERE id = ?`
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		event.Name,
+		event.Description,
+		event.Location,
+		event.DateTime,
+		event.ID,
+	)
 
 	return err
 }

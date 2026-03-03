@@ -128,3 +128,48 @@ func updateEvent(context *gin.Context) {
 	})
 
 }
+
+func patchEvent(context *gin.Context) {
+	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message":     "Failed",
+			"status_code": http.StatusBadRequest,
+			"error":       err.Error(),
+		})
+		return
+	}
+
+	event, err := models.GetSingleEvent(eventId)
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "Event not found"})
+		return
+	}
+	var input models.UpdateEventInput
+	if err := context.ShouldBindJSON(&input); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if input.Name != nil {
+		event.Name = *input.Name
+	}
+	if input.Description != nil {
+		event.Description = *input.Description
+	}
+	if input.Location != nil {
+		event.Location = *input.Location
+	}
+	if input.DateTime != nil {
+		event.DateTime = *input.DateTime
+	}
+	err = event.Update()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Update failed"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Event updated successfully",
+		"data":    event,
+	})
+}
