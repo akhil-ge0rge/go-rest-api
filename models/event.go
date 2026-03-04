@@ -123,7 +123,7 @@ func (event Event) Patch() error {
 	return err
 }
 
-func Delete(id int64) error {
+func (event Event) Delete(id int64) error {
 	query := `DELETE FROM events
 			  WHERE id = ?`
 	stmt, err := db.DB.Prepare(query)

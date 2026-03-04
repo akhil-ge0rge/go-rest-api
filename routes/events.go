@@ -184,7 +184,13 @@ func deleteEvent(context *gin.Context) {
 		})
 		return
 	}
-	err = models.Delete(eventId)
+
+	event, err := models.GetSingleEvent(eventId)
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "Event not found"})
+		return
+	}
+	err = event.Delete(eventId)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Delete failed"})
 		return
