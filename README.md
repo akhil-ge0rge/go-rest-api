@@ -220,5 +220,3 @@ Response
   "message": "Event Deleted successfully"
 }
 ```
-
----
