@@ -23,7 +23,7 @@ type UpdateEventInput struct {
 
 var events = []Event{}
 
-func (e Event) Save() error {
+func (e *Event) Save() error {
 	// events = append(events, e)
 
 	query := `INSERT INTO events(name,description,location,dateTime,user_id)
@@ -39,9 +39,13 @@ func (e Event) Save() error {
 	if err != nil {
 		return err
 	}
+
 	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
 	e.ID = id
-	return err
+	return nil
 }
 
 func GetAllEvents() ([]Event, error) {

@@ -18,7 +18,7 @@ func GenerateToken(email string, userId int64) (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func VerifyToken(token string) (float64, error) {
+func VerifyToken(token string) (int64, error) {
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -43,5 +43,5 @@ func VerifyToken(token string) (float64, error) {
 	// email := calims["email"].(string)
 	userId := calims["userId"].(float64)
 
-	return userId, nil
+	return int64(userId), nil
 }

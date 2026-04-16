@@ -61,7 +61,21 @@ func createEvents(context *gin.Context) {
 		})
 		return
 	}
-	userId := context.GetInt64("userId")
+	userIdValue, exists := context.Get("userId")
+	if !exists {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"message": "User not found in context",
+		})
+		return
+	}
+
+	userId, ok := userIdValue.(int64)
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Invalid userId type",
+		})
+		return
+	}
 	event.UserID = userId
 	err = event.Save()
 	if err != nil {
@@ -89,12 +103,21 @@ func updateEvent(context *gin.Context) {
 		})
 		return
 	}
-
-	_, err = models.GetSingleEvent(eventId)
+	userId := context.GetInt64("userId")
+	event, err := models.GetSingleEvent(eventId)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"message":     "Failed",
 			"status_code": http.StatusInternalServerError,
+			"error":       err.Error(),
+		})
+		return
+	}
+
+	if event.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"message":     "Not Authorized to Update",
+			"status_code": http.StatusUnauthorized,
 			"error":       err.Error(),
 		})
 		return
